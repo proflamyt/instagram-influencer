@@ -23,11 +23,13 @@ async def root():
 
 
 @app.post('/login', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-async def login_user(payload: CreateUserSchema):
-    
-    return {
-        'payload': payload
-    }
+async def login_user(payload: CreateUserSchema, db: Session = Depends(get_db)):
+    if crude.login_user(db, payload):
+        # sign jwt
+        return {
+            'payload': payload
+        }
+    raise HTTPException(status_code=400, detail="Email already registered")
   
 @app.post('/register', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def create_user(payload: LoginUserSchema, db: Session = Depends(get_db)):

@@ -1,9 +1,10 @@
 from sqlalchemy.orm import Session
-
+from passlib.context import CryptContext
 from ..sql_app import model, schema
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-def get_user(db: Session, email: str):
+def get_user(db: Session, email: str) -> model.User:
     return db.query(model.User).filter(model.User.email == email).first()
 
 
@@ -16,7 +17,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, user: schema.LoginUserSchema):
-    hashed_password = user.password + "notreallyhashed"
+    hashed_password = pwd_context.hash(user.password)
     db_user = model.User(email=user.email, hashed_password=hashed_password)
     db.add(db_user)
     db.commit()
@@ -40,3 +41,9 @@ def search(db: Session, text:str=None, max_follower: int=None, min_follower: int
         return db.query(model.Profile).filter(model.Profile.followers >= min_follower).all()
 
     return db.query(model.Profile).filter(model.Profile.followers < max_follower).all()
+
+
+
+def login_user(db:Session, user: schema.LoginUserSchema) -> bool:
+    stored_user = get_user(db, user.email)
+    return pwd_context.verify(user.password, stored_user.hashed_pass)
