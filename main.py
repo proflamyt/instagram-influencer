@@ -1,10 +1,10 @@
-from crud.crude import get_user
-from fastapi import Depends, FastAPI, HTTPException
+from crud import crude
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 import os
 from sql_app.model import User as UserModel
 import datetime
-from sql_app.schema import CreateUserSchema, LoginUserSchema, UserBaseSchema, UserResponse
+from sql_app.schema import CreateUserSchema, LoginUserSchema, ProfileSchema, UserBaseSchema, UserResponse
 from sql_app.database import Base, SessionLocal, engine
 
 
@@ -26,7 +26,7 @@ async def root():
 
 
 @app.post('/login', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
-async def login_user(payload: CreateUserSchema, request: Request):
+async def login_user(payload: CreateUserSchema):
     
     return {
         'payload': payload
@@ -34,26 +34,26 @@ async def login_user(payload: CreateUserSchema, request: Request):
   
 @app.post('/register', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def create_user(payload: LoginUserSchema, db: Session = Depends(get_db)):
-    user_email = payload.email.lower()
-    if get_user(db, user_email):
-        raise HTTPException(status_code=400, detail="Email already registered")
-
-    hash =  payload.password
-    user =  UserModel(email=user_email, hashed_pass=hash, time_created=datetime.utcnow())
-    db.session.add(user)
-    db.session.commit()
-
     
+    if crude.get_user(db, payload.email.lower()):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    user = crude.create_user(db, payload)
+
     return {
         'payload': user
     }
   
-# authenticated route
+# authenticated route Depends
 @app.post('/user/update', status_code=status.HTTP_201_CREATED, response_model=UserBaseSchema)
-async def update_user(payload: UserBaseSchema, request: Request):
-    user = UserModel()
-    db.session.update(user)
-    db.session.commit()
-    ...
+async def update_user(payload: ProfileSchema, db: Session = Depends(get_db)):
+    user = crude.update_profile(user_id, payload)
+    return user
 
 
+
+@app.get('/search', status_code=status.HTTP_201_CREATED, response_model=UserBaseSchema)
+async def get_users(text:str=None, max_follower: int =None, min_follower: int=None, db: Session = Depends(get_db)):
+    if text or max_follower or min_follower:
+        return crude.search(text, max_follower, min_follower)
+        
+    return crude.get_users(db)

@@ -1,10 +1,9 @@
 from datetime import datetime
 from typing import List
 from pydantic import BaseModel, EmailStr, constr
-from bson.objectid import ObjectId
 
 
-class UserBaseSchema(BaseModel):
+class ProfileSchema(BaseModel):
     username: str
     bio: str
     follower_count: int
@@ -14,7 +13,7 @@ class UserBaseSchema(BaseModel):
         orm_mode = True
 
 
-class CreateUserSchema(UserBaseSchema):
+class CreateUserSchema(BaseModel):
     password: constr(min_length=8)
     email: str
     
@@ -31,7 +30,7 @@ class LoginUserSchema(BaseModel):
         orm_mode = True
 
 
-class UserResponseSchema(UserBaseSchema):
+class UserResponseSchema(ProfileSchema):
     id: str
     pass
 
@@ -41,7 +40,7 @@ class UserResponse(BaseModel):
     user: UserResponseSchema
 
 
-class FilteredUserResponse(UserBaseSchema):
+class FilteredUserResponse(ProfileSchema):
     id: str
 
 
