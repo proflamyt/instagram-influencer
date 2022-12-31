@@ -1,9 +1,6 @@
 from crud import crude
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
-import os
-from sql_app.model import User as UserModel
-import datetime
 from sql_app.schema import CreateUserSchema, LoginUserSchema, ProfileSchema, UserBaseSchema, UserResponse
 from sql_app.database import Base, SessionLocal, engine
 
@@ -54,6 +51,5 @@ async def update_user(payload: ProfileSchema, db: Session = Depends(get_db)):
 @app.get('/search', status_code=status.HTTP_201_CREATED, response_model=UserBaseSchema)
 async def get_users(text:str=None, max_follower: int =None, min_follower: int=None, db: Session = Depends(get_db)):
     if text or max_follower or min_follower:
-        return crude.search(text, max_follower, min_follower)
-        
+        return crude.search(text, max_follower, min_follower) 
     return crude.get_users(db)
