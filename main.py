@@ -3,7 +3,7 @@ from auth import create_access_token, get_current_user
 from crud import crude
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
-from sql_app.schema import CreateUserSchema, LoginUserSchema, ProfileSchema, UserBaseSchema, UserResponse
+from sql_app.schema import CreateUserSchema, LoginUserSchema, ProfileSchema, UserResponse
 from sql_app.database import Base, SessionLocal, engine
 from config import settings
 

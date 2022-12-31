@@ -17,6 +17,7 @@ class User(Base):
 
 class Profile(Base):
     __tablename__ = 'profiles'
+    id = Column(Integer, primary_key=True)
     username = Column(String)
     bio = Column(String(100))
     follower_count = Column(Integer)
