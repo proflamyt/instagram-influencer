@@ -44,5 +44,5 @@ class FilteredUserResponse(ProfileSchema):
     id: str
 
 
-
-
+class TokenData(BaseModel):
+    email: EmailStr | None = None

@@ -1,41 +1,40 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pyjwt import decode, encode
+from jose import JWTError, jwt
+from datetime import datetime, timedelta
+from config import settings
+from sql_app.schema import TokenData
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-def get_current_user(token: str = Depends(get_token)):
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    to_encode = data.copy()
+    if expires_delta:
+        expire = datetime.utcnow() + expires_delta
+    else:
+        expire = datetime.utcnow() + timedelta(minutes=15)
+    to_encode.update({"exp": expire})
+    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
+    return encoded_jwt
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
-        payload = decode(token, secret, algorithms=[ALGORITHM])
-        return User(**payload)
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            raise credentials_exception
+        token_data = TokenData(email=email)
+    except JWTError:
+        raise credentials_exception
+    return token_data.email
+    
 
-def get_token(authorization: HTTPAuthorizationCredentials = Depends(get_authorization)):
-    if authorization.scheme.lower() != "bearer":
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authorization scheme",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return authorization.credentials
 
-def get_authorization(authorization: str = Depends(get_api_key)):
-    if not authorization:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return HTTPAuthorizationCredentials(scheme=authorization.split(" ", 1)[0], credentials=authorization.split(" ", 1)[1])
-
-def get_api_key(api_key: str = Header(...)):
-    return api_key
-
-# @app.get("/users/me")
-# def read_current_user(current_user: User = Depends(get_current_user)):
-#     return current_user

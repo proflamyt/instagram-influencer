@@ -26,8 +26,8 @@ def create_user(db: Session, user: schema.LoginUserSchema):
 
 
 
-def update_profile(db: Session, profile: schema.ProfileSchema, user_id: int):
-    user_profile = model.Profile(**profile.dict(), user=user_id)
+def update_profile(db: Session, profile: schema.ProfileSchema, user_email: str):
+    user_profile = model.Profile(**profile.dict(), user=user_email)
     db.add(user_profile)
     db.commit()
     db.refresh(user_profile)

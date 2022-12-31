@@ -1,3 +1,4 @@
+from auth import create_access_token, get_current_user
 from crud import crude
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
@@ -26,8 +27,11 @@ async def root():
 async def login_user(payload: CreateUserSchema, db: Session = Depends(get_db)):
     if crude.login_user(db, payload):
         # sign jwt
+        access_token = create_access_token()
         return {
-            'payload': payload
+            "access_token": access_token,
+            "token_type": "bearer"
+
         }
     raise HTTPException(status_code=400, detail="Email already registered")
   
@@ -44,8 +48,8 @@ async def create_user(payload: LoginUserSchema, db: Session = Depends(get_db)):
   
 # authenticated route Depends
 @app.post('/user/update', status_code=status.HTTP_201_CREATED, response_model=UserBaseSchema)
-async def update_user(payload: ProfileSchema, db: Session = Depends(get_db)):
-    user = crude.update_profile(user_id, payload)
+async def update_user(payload: ProfileSchema, db: Session = Depends(get_db), current_user_email: str= Depends(get_current_user)):
+    user = crude.update_profile(db, payload, current_user_email)
     return user
 
 

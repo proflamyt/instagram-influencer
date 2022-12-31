@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRES_IN: int
     ACCESS_TOKEN_EXPIRES_IN: int
     JWT_ALGORITHM: str
+    SECRET_KEY: str
 
     CLIENT_ORIGIN: str
 
