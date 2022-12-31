@@ -1,9 +1,11 @@
+from datetime import timedelta
 from auth import create_access_token, get_current_user
 from crud import crude
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 from sql_app.schema import CreateUserSchema, LoginUserSchema, ProfileSchema, UserBaseSchema, UserResponse
 from sql_app.database import Base, SessionLocal, engine
+from config import settings
 
 
 app = FastAPI()
@@ -25,9 +27,14 @@ async def root():
 
 @app.post('/login', status_code=status.HTTP_201_CREATED, response_model=UserResponse)
 async def login_user(payload: CreateUserSchema, db: Session = Depends(get_db)):
-    if crude.login_user(db, payload):
+    user = crude.login_user(db, payload)
+    if user:
         # sign jwt
-        access_token = create_access_token()
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRES_IN)
+        access_token = create_access_token(
+            data= {"sub": user.email},
+            expires_delta=access_token_expires
+        )
         return {
             "access_token": access_token,
             "token_type": "bearer"

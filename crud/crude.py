@@ -44,6 +44,8 @@ def search(db: Session, text:str=None, max_follower: int=None, min_follower: int
 
 
 
-def login_user(db:Session, user: schema.LoginUserSchema) -> bool:
+def login_user(db:Session, user: schema.LoginUserSchema) -> model.User | None:
     stored_user = get_user(db, user.email)
-    return pwd_context.verify(user.password, stored_user.hashed_pass)
+    if pwd_context.verify(user.password, stored_user.hashed_pass):
+        return stored_user
+    return None
