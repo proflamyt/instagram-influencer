@@ -18,7 +18,7 @@ class User(Base):
 class Profile(Base):
     __tablename__ = 'profiles'
     username = Column(String)
-    bio = Column(String)
+    bio = Column(String(100))
     follower_count = Column(Integer)
     time_updated = Column(DateTime(timezone=True), onupdate=func.now())
     
