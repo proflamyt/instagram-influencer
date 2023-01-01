@@ -7,11 +7,17 @@ class ProfileSchema(BaseModel):
     username: str
     bio: str
     follower_count: int
-    updated_at: datetime | None = None
+    time_updated: datetime | None = None
 
     class Config:
         orm_mode = True
 
+class SearchResponse(BaseModel):
+    email: str
+    time_created: datetime 
+
+    class Config:
+        orm_mode = True
 
 class CreateUserSchema(BaseModel):
     password: constr(min_length=8)
@@ -31,13 +37,13 @@ class LoginUserSchema(BaseModel):
 
 
 class UserResponseSchema(ProfileSchema):
-    id: str
-    pass
+    email: EmailStr
+    
 
 
 class UserResponse(BaseModel):
     status: str
-    user: UserResponseSchema
+    user: EmailStr
 
 
 class FilteredUserResponse(ProfileSchema):
