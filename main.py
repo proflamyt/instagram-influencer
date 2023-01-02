@@ -1,11 +1,11 @@
 from datetime import timedelta
-from auth import create_access_token, get_current_user
+from utils.auth import create_access_token, get_current_user
 from crud import crude
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy.orm import Session
 from sql_app.schema import CreateUserSchema, LoginUserSchema, ProfileSchema, SearchResponse, UserResponse, UserResponseSchema
 from sql_app.database import Base, SessionLocal, engine
-from config import settings
+from utils.config import settings
 
 
 app = FastAPI()

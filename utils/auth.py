@@ -1,7 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
-from config import settings
+from utils.config import settings
 from sql_app.schema import TokenData
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 

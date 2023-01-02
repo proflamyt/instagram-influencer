@@ -13,7 +13,7 @@ class User(Base):
     hashed_pass = Column(String)
     time_created = Column(DateTime(timezone=True), server_default=func.now())
     profile_id = Column(Integer, ForeignKey('profiles.id'))
-    profile = relationship("Profile", back_populates="user")
+    profile = relationship("Profile", back_populates="user", uselist=False)
 
 class Profile(Base):
     __tablename__ = 'profiles'
@@ -24,4 +24,4 @@ class Profile(Base):
     time_updated = Column(DateTime(timezone=True), onupdate=func.now())
     
 
-Profile.user = relationship("User", back_populates="profile")
+Profile.user = relationship("User", back_populates="profile", uselist=False)
